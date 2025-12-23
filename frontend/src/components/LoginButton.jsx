@@ -16,7 +16,11 @@ const LoginButton = () => {
         }
     }
 
-    return <button onClick={handleLoginClick}>Log in</button>
+    return <button 
+            type="button" 
+            onClick={handleLoginClick}>
+                Log in
+        </button>
 }
 
 

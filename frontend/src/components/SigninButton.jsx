@@ -2,15 +2,22 @@ import { useContext } from "react"
 import CredentialContext from "../context/CredentialContext"
 
 const SigninButton = () => {
-    const { userName, setUserName } = useContext(CredentialContext)
+    const { userName, setUserName, password, setPassword} = useContext(CredentialContext)
 
-    const handleSignUp = () => {
+    const handleSignUp = async () => {
         const userExist = await checkIfUserExist(userName)
         
+        if (!userExist) {
+            // send user credential to db 
+        } else {
+            alert("user name already exist. Please log in / use different user name")
+        }
     }
 
 
-    return <button>Sign Up</button>
+    return <button type="submit" onClick={handleSignUp}>
+            Sign Up
+        </button>
 }
 
 export default SigninButton;
