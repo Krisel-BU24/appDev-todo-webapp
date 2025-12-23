@@ -1,5 +1,5 @@
 import "..//style/login.css";
-
+import LoginButton from  "../components/LoginButton.jsx"
 const Login = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -33,8 +33,9 @@ const Login = () => {
             required
             />
 
-            <button type="submit">Sign In</button>
-            <button type="submit">Log in </button>
+            <button type="submit">Sign Up</button>
+            <LoginButton/>
+
         </form>
         </div>
     );
