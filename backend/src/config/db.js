@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+import { MongoClient, ServerApiVersion } from 'mongodb';
 import dotenv from "dotenv";
 
 dotenv.config(); // load .env
@@ -30,6 +30,7 @@ export async function connectDb() {
 
         // ! move the name to a const 
         db = client.db("todo_platform");
+        
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } catch (err) {
         // Ensures that the client will close when you finish/error
