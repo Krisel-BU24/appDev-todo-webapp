@@ -97,16 +97,25 @@ app.get("/api/tasks", auth, async (req, res) => {
 
 // Add Task (Protected)
 app.post("/api/task/add", auth, async (req, res) => {
-    const { taskName } = req.body;
+    const { taskName, priorityLevel } = req.body; // ✅ Extract BOTH fields
+    
+    console.log("Received task data:", { taskName, priorityLevel }); // Debug log
+    
     try {
         const user = await User.findById(req.userId);
         if (!user) return res.status(404).json({ error: "User not found" });
 
-        user.tasks.push({ taskName }); 
+        // Push both fields to tasks array
+        user.tasks.push({ 
+            taskName, 
+            priorityLevel: priorityLevel || "none" // Default to "none" if not provided
+        }); 
+        
         await user.save();
 
         res.json({ message: "Task added", tasks: user.tasks });
     } catch (err) {
+        console.error("Error adding task:", err);
         res.status(500).json({ error: "Server error" });
     }
 });

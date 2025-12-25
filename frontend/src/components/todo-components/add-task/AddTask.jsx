@@ -1,24 +1,28 @@
 import { useContext, useState } from "react";
 import "../add-task/AddTask.css"
 import CredentialContext from "../../../context/CredentialContext";
-const AddTask = () => {
-    const {userName, setUserName, token, setToken, isAuth, setAuth} = useContext(CredentialContext);
-    
+
+const AddTask = ({ refreshTasks }) => { 
+    const { token } = useContext(CredentialContext);
     const [showPopup, setShowPopup] = useState(false);
     
-    // Initial state for a blank task
+    // Initialize with "none" to match your select options
     const [taskData, setTaskData] = useState({
         taskName: "",
-        priorityLevel: "low" // matching your model enum
+        priorityLevel: "none"  // Changed from "" to "none"
     });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        console.log(`Field ${name} changed to:`, value); // Debug log
         setTaskData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Debugging: Check this in your browser console!
+        console.log("Sending to Backend:", taskData);
 
         try {
             const response = await fetch("http://localhost:3000/api/task/add", {
@@ -27,44 +31,43 @@ const AddTask = () => {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                // Pass the whole state object
                 body: JSON.stringify(taskData) 
             });
 
             if (response.ok) {
-                const data = await response.json();
-                console.log("Task Added:", data);
+                const result = await response.json();
+                console.log("Task added successfully:", result);
                 
-                // 1. Reset the form
-                setTaskData({ taskName: "", priorityLevel: "low" });
-                // 2. Close the popup
+                setTaskData({ taskName: "", priorityLevel: "none" });
                 setShowPopup(false);
-                // 3. Refresh the parent list so the new task appears!
+                
                 if (refreshTasks) refreshTasks(); 
             } else {
-                alert("Failed to add task. Check console.");
+                const errorData = await response.json();
+                alert(`Error: ${errorData.message || "Failed to add task"}`); // FIXED: Added opening (
             }
         } catch (err) {
             console.error("Error adding task:", err);
+            alert("Network error. Please try again.");
         }
     };
 
-
     return (
         <>
-            {/* The trigger button */}
-            <button 
-                className="add-task-btn"
-                onClick={() => setShowPopup(true)}>
-                    <span className="add-task-label">Add New Task</span>
+            <button className="add-task-btn" onClick={() => setShowPopup(true)}>
+                <span className="add-task-label">Add New Task</span>
             </button>
 
             {showPopup && (
-                <div className="popup-overlay">
-                    <form className="popup-content" onSubmit={handleSubmit}>
+                <div className="popup-overlay" onClick={() => setShowPopup(false)}>
+                    <form 
+                        className="popup-content" 
+                        onSubmit={handleSubmit}
+                        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking form
+                    >
                         <h3>Create Task</h3>
                         
-                        <span>Title</span>
+                        <label>Title</label>
                         <input 
                             type="text" 
                             name="taskName"
@@ -73,7 +76,7 @@ const AddTask = () => {
                             required 
                         />
 
-                        <span>Priority Level</span>
+                        <label>Priority Level</label>
                         <select 
                             name="priorityLevel" 
                             value={taskData.priorityLevel}
@@ -87,7 +90,9 @@ const AddTask = () => {
 
                         <div className="button-group">
                             <button type="submit">Add Task</button>
-                            <button type="button" onClick={() => setShowPopup(false)}>Cancel</button>
+                            <button type="button" onClick={() => setShowPopup(false)}>
+                                Cancel
+                            </button>
                         </div>
                     </form>
                 </div>

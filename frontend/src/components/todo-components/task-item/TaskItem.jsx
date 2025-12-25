@@ -13,9 +13,9 @@ const TaskItem = ({
     onToggleSelect,
     taskId
 }) => {
-    const taskColor = { "low": "yellow", "med": "orange", "high": "red" };
+    const taskColor = {"none": "gray", "low": "yellow", "med": "orange", "high": "red" };
     const [showPopup, setShowPopup] = useState(false);
-    const activeColor = taskColor[priorityLevel] || "gray";
+    const activeColor = taskColor[priorityLevel];
 
     const dateObj = new Date(dateAdded);
     const time = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
