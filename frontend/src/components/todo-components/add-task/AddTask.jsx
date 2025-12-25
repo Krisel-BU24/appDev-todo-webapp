@@ -9,7 +9,7 @@ const AddTask = ({ refreshTasks }) => {
     // Initialize with "none" to match your select options
     const [taskData, setTaskData] = useState({
         taskName: "",
-        priorityLevel: "none"  // Changed from "" to "none"
+        priorityLevel: "none"  // Default val
     });
 
     const handleChange = (e) => {

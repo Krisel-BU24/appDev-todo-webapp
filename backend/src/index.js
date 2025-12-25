@@ -17,7 +17,7 @@ const saltRounds = 10;
 // Middleware
 app.use(cors({
     origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
     credentials: true
 }));
 app.use(express.json());
@@ -97,7 +97,7 @@ app.get("/api/tasks", auth, async (req, res) => {
 
 // Add Task (Protected)
 app.post("/api/task/add", auth, async (req, res) => {
-    const { taskName, priorityLevel } = req.body; // ✅ Extract BOTH fields
+    const { taskName, priorityLevel } = req.body; // TODO: add taskDets if in use 
     
     console.log("Received task data:", { taskName, priorityLevel }); // Debug log
     
@@ -146,6 +146,37 @@ app.delete("/api/tasks/delete", auth, async (req, res) => {
         });
     } catch (err) {
         res.status(500).json({ error: "Server error during deletion" });
+    }
+});
+// Update task resolved status
+app.patch("/api/tasks/:taskId/resolve", auth, async (req, res) => {
+    const { taskId } = req.params;
+    const { isResolved } = req.body;
+    
+    console.log(`Updating task ${taskId} to resolved: ${isResolved}`);
+    
+    try {
+        const user = await User.findById(req.userId);
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        // Find the task in the user's tasks array
+        const task = user.tasks.id(taskId);
+        
+        if (!task) {
+            return res.status(404).json({ error: "Task not found" });
+        }
+        // Update the isResolved property
+        task.isResolved = isResolved;
+        
+        await user.save();
+
+        res.json({ 
+            message: "Task updated successfully", 
+            task: task
+        });
+    } catch (err) {
+        console.error("Error updating task:", err);
+        res.status(500).json({ error: "Server error while updating task" });
     }
 });
 

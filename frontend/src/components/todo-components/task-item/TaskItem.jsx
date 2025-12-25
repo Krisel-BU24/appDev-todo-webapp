@@ -11,6 +11,7 @@ const TaskItem = ({
     isDeleteMode,
     isSelected,
     onToggleSelect,
+    onToggleResolved,
     taskId
 }) => {
     const taskColor = {"none": "gray", "low": "yellow", "med": "orange", "high": "red" };
@@ -35,6 +36,11 @@ const TaskItem = ({
         onToggleSelect(taskId);
     };
 
+    const handleRadioClick = (e) => {
+        e.stopPropagation(); // Prevent event from bubbling to the card
+        onToggleResolved(taskId, !isResolved);
+    };
+
     return (
         <>
             <div
@@ -55,13 +61,15 @@ const TaskItem = ({
                         className="delete-checkbox"
                         checked={isSelected}
                         onChange={handleCheckboxChange}
+                        onClick={(e) => e.stopPropagation()} // Add this
                     />
                 ) : (
                     <input
-                        type="radio"
+                        type="checkbox"
+                        className="resolve-checkbox"
                         checked={isResolved}
-                        onClick={(e) => e.stopPropagation()}
-                        readOnly
+                        onChange={handleRadioClick}
+                        onClick={(e) => e.stopPropagation()} // Add this too
                     />
                 )}
             </div>
@@ -74,6 +82,9 @@ const TaskItem = ({
                         <hr />
                         <span>Task Details:</span>
                         <span className="task-detail">{taskDetail}</span>
+                        <hr />
+                        <span>Status:</span>
+                        <span>{isResolved ? '✅ Completed' : '⏳ Pending'}</span>
                     </div>
                 </div>
             )}

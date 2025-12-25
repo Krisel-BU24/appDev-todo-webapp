@@ -1,21 +1,152 @@
 .todo-container {
-    /* border: 1px solid blue; */
     width: 50vw;
     height: inherit;
+    margin: 0 auto;
+    padding-top: 2rem;
+}
+
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
 .title {
-    font-size: xx-large;
-    font-weight: bolder;
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0;
+    color: #2d3436;
+}
+
+/* The "Delete Tasks" Toggle Button */
+.toggle-delete-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 2px solid #ff7675;
+    background: transparent;
+    color: #d63031;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.toggle-delete-btn.active {
+    background: #ff7675;
+    color: white;
+}
+
+.toggle-delete-btn:hover {
+    background: #d63031;
+    color: white;
+}
+
+/* Delete Controls Bar (Select All / Delete Selected) */
+.delete-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff5f5;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #fab1a0;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.selection-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.select-btn {
+    background: white;
+    border: 1px solid #dfe6e9;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.select-btn:hover {
+    background: #f1f2f6;
+    border-color: #b2bec3;
+}
+
+/* The Big Red Delete Button */
+.delete-selected-btn {
+    background: #d63031;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.delete-selected-btn:disabled {
+    background: #fab1a0;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.delete-selected-btn:not(:disabled):hover {
+    background: #c0392b;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(214, 48, 49, 0.3);
 }
 
 #my-task-container {
-    border: 1px solid rgb(198, 193, 193);
-    height: max-content;
-    padding: 10px 20px;
+    border: 1px solid #dfe6e9;
+    background: #fdfdfd;
+    min-height: 200px;
+    padding: 20px;
     display: flex;
     margin: 10px 0px;
     flex-direction: column;
     border-radius: 15px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
 }
 
+.bar {
+    height: 2px;
+    background: #f1f2f6;
+    margin: 10px 0 20px 0;
+}
+
+.toggle-show-btn {
+    padding: 0.5rem 1rem;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+    margin-right: 0.5rem;
+}
+
+.toggle-show-btn:hover {
+    background-color: #2980b9;
+}
+
+.toggle-show-btn.active {
+    background-color: #27ae60;
+}
+
+.toggle-show-btn.active:hover {
+    background-color: #229954;
+}
+
+.resolve-checkbox {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+}

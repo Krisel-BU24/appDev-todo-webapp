@@ -11,6 +11,7 @@ const TodoContainer = () => {
     const [tasks, setTasks] = useState([]);
     const [isDeleteMode, setIsDeleteMode] = useState(false);
     const [selectedTasks, setSelectedTasks] = useState(new Set());
+    const [showCompleted, setShowCompleted] = useState(false);
 
     const getTasks = async () => {
         if (!token) {
@@ -56,7 +57,7 @@ const TodoContainer = () => {
     };
 
     const toggleTaskSelection = (taskId) => {
-        const idString = String(taskId); // Convert to string for consistency
+        const idString = String(taskId);
         setSelectedTasks(prev => {
             const newSet = new Set(prev);
             if (newSet.has(idString)) {
@@ -69,13 +70,42 @@ const TodoContainer = () => {
         });
     };
 
+    const toggleTaskResolved = async (taskId, newResolvedState) => {
+        try {
+            console.log(`Toggling task ${taskId} to resolved: ${newResolvedState}`);
+
+            const response = await fetch(`http://localhost:3000/api/tasks/${taskId}/resolve`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ isResolved: newResolvedState })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log("Task resolved status updated:", result);
+                
+                // Refresh tasks to show updated state
+                await getTasks();
+            } else {
+                const errorData = await response.json();
+                console.error("Failed to update task:", errorData);
+                alert(`Failed to update task: ${errorData.error || 'Unknown error'}`);
+            }
+        } catch (err) {
+            console.error("Error updating task:", err);
+            alert("Network error. Please check your connection and try again.");
+        }
+    };
+
     const handleDeleteSelected = async () => {
         if (selectedTasks.size === 0) {
             alert("Please select at least one task to delete");
             return;
         }
 
-        // Convert selected IDs to strings for comparison
         const selectedIdsArray = Array.from(selectedTasks);
         const tasksToDelete = tasks.filter(task => 
             selectedIdsArray.includes(String(task._id))
@@ -104,7 +134,6 @@ const TodoContainer = () => {
             console.log("Delete response:", result);
 
             if (response.ok) {
-                // Refresh tasks after deletion
                 await getTasks();
                 setSelectedTasks(new Set());
                 setIsDeleteMode(false);
@@ -131,11 +160,31 @@ const TodoContainer = () => {
         setSelectedTasks(new Set());
     };
 
+    // Filter tasks based on completion status
+    const filteredTasks = showCompleted 
+        ? tasks 
+        : tasks.filter(task => !task.isResolved);
+
+    const completedCount = tasks.filter(task => task.isResolved).length;
+    const pendingCount = tasks.length - completedCount;
+
     return (
         <div className="container todo-container">
             <div className="header-section">
-                <p className="title">Task</p>
+                <p className="title">
+                    Tasks 
+                    <span style={{ fontSize: '1rem', color: '#636e72', marginLeft: '10px' }}>
+                        ({pendingCount} pending / {completedCount} completed)
+                    </span>
+                </p>
+
                 <div className="action-buttons">
+                    <button 
+                        className={`toggle-show-btn ${showCompleted ? 'active' : ''}`}
+                        onClick={() => setShowCompleted(!showCompleted)}
+                    >
+                        {showCompleted ? 'Hide Completed' : 'Show Completed'}
+                    </button>
                     <button 
                         className={`toggle-delete-btn ${isDeleteMode ? 'active' : ''}`}
                         onClick={toggleDeleteMode}
@@ -149,7 +198,7 @@ const TodoContainer = () => {
                 <div className="delete-controls">
                     <div className="selection-buttons">
                         <button onClick={selectAll} className="select-btn">
-                            Select All ({tasks.length})
+                            Select All ({filteredTasks.length})
                         </button>
                         <button onClick={deselectAll} className="select-btn">
                             Deselect All
@@ -169,8 +218,8 @@ const TodoContainer = () => {
                 <p>My task</p>
                 <div className="bar"></div>
 
-                {tasks && tasks.length > 0 ? (
-                    tasks.map((task) => (
+                {filteredTasks && filteredTasks.length > 0 ? (
+                    filteredTasks.map((task) => (
                         <TaskItem
                             key={task._id}
                             taskId={task._id}
@@ -180,12 +229,13 @@ const TodoContainer = () => {
                             dateAdded={task.dateAdded}
                             isResolved={task.isResolved}
                             isDeleteMode={isDeleteMode}
-                            isSelected={selectedTasks.has(String(task._id))} // CONVERT HERE TOO!
+                            isSelected={selectedTasks.has(String(task._id))}
                             onToggleSelect={toggleTaskSelection}
+                            onToggleResolved={toggleTaskResolved}
                         />
                     ))
                 ) : (
-                    <p>No tasks found.</p>
+                    <p>{showCompleted ? 'No tasks found.' : 'No pending tasks! 🎉'}</p>
                 )}
             </div>
 
@@ -195,4 +245,3 @@ const TodoContainer = () => {
 }
 
 export default TodoContainer;
-
