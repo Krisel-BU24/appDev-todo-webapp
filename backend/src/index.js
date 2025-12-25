@@ -111,6 +111,35 @@ app.post("/api/task/add", auth, async (req, res) => {
     }
 });
 
+// delete task 
+// Delete multiple tasks
+app.delete("/api/tasks/delete", auth, async (req, res) => {
+    const { taskIds } = req.body;
+    
+    if (!Array.isArray(taskIds)) {
+        return res.status(400).json({ error: "Invalid input: taskIds must be an array" });
+    }
+
+    try {
+        const user = await User.findById(req.userId);
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        // Filter: Keep tasks whose ID is NOT in the taskIds array
+        const initialCount = user.tasks.length;
+        user.tasks = user.tasks.filter(task => !taskIds.includes(task._id.toString()));
+
+        await user.save();
+
+        res.json({ 
+            message: "Deletion successful", 
+            deletedCount: initialCount - user.tasks.length,
+            remainingTasks: user.tasks 
+        });
+    } catch (err) {
+        res.status(500).json({ error: "Server error during deletion" });
+    }
+});
+
 // Start Server
 async function startServer() {
     await connectDb();

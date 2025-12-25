@@ -30,7 +30,7 @@ const TaskItem = ({
         }
     };
 
-    const handleCheckboxClick = (e) => {
+    const handleCheckboxChange = (e) => {
         e.stopPropagation();
         onToggleSelect(taskId);
     };
@@ -52,9 +52,9 @@ const TaskItem = ({
                 {isDeleteMode ? (
                     <input
                         type="checkbox"
+                        className="delete-checkbox"
                         checked={isSelected}
-                        onChange={handleCheckboxClick}
-                        onClick={(e) => e.stopPropagation()}
+                        onChange={handleCheckboxChange}
                     />
                 ) : (
                     <input

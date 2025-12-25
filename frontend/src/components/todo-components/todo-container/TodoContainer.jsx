@@ -37,6 +37,7 @@ const TodoContainer = () => {
             if (response.ok) {
                 const data = await response.json();
                 setTasks(data);
+                console.log("Fetched tasks:", data);
             } else {
                 console.error("Server error:", response.status);
             }
@@ -51,17 +52,19 @@ const TodoContainer = () => {
 
     const toggleDeleteMode = () => {
         setIsDeleteMode(!isDeleteMode);
-        setSelectedTasks(new Set()); // Clear selections when toggling
+        setSelectedTasks(new Set());
     };
 
     const toggleTaskSelection = (taskId) => {
+        const idString = String(taskId); // Convert to string for consistency
         setSelectedTasks(prev => {
             const newSet = new Set(prev);
-            if (newSet.has(taskId)) {
-                newSet.delete(taskId);
+            if (newSet.has(idString)) {
+                newSet.delete(idString);
             } else {
-                newSet.add(taskId);
+                newSet.add(idString);
             }
+            console.log("Selected tasks after toggle:", Array.from(newSet));
             return newSet;
         });
     };
@@ -72,42 +75,59 @@ const TodoContainer = () => {
             return;
         }
 
+        // Convert selected IDs to strings for comparison
+        const selectedIdsArray = Array.from(selectedTasks);
+        const tasksToDelete = tasks.filter(task => 
+            selectedIdsArray.includes(String(task._id))
+        );
+        const taskNames = tasksToDelete.map(t => t.taskName).join(", ");
+        
         const confirmDelete = window.confirm(
-            `Are you sure you want to delete ${selectedTasks.size} task(s)?`
+            `Are you sure you want to delete ${selectedTasks.size} task(s)?\n\n${taskNames}`
         );
 
         if (!confirmDelete) return;
 
         try {
-            // You'll implement the backend delete endpoint later
-            // For now, just filter locally
+            console.log("Deleting task IDs:", selectedIdsArray);
+
             const response = await fetch("http://localhost:3000/api/tasks/delete", {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify({ taskIds: Array.from(selectedTasks) })
+                body: JSON.stringify({ taskIds: selectedIdsArray })
             });
+
+            const result = await response.json();
+            console.log("Delete response:", result);
 
             if (response.ok) {
                 // Refresh tasks after deletion
                 await getTasks();
                 setSelectedTasks(new Set());
                 setIsDeleteMode(false);
+                
+                alert(`Successfully deleted ${result.deletedCount} task(s)`);
+            } else {
+                console.error("Delete failed:", result);
+                alert(`Failed to delete tasks: ${result.error || 'Unknown error'}`);
             }
         } catch (err) {
             console.error("Error deleting tasks:", err);
-            alert("Failed to delete tasks. Please try again.");
+            alert("Network error. Please check your connection and try again.");
         }
     };
 
     const selectAll = () => {
-        const allTaskIds = tasks.map(task => task._id);
+        const allTaskIds = tasks.map(task => String(task._id));
+        console.log("Selecting all:", allTaskIds);
         setSelectedTasks(new Set(allTaskIds));
     };
 
     const deselectAll = () => {
+        console.log("Deselecting all tasks");
         setSelectedTasks(new Set());
     };
 
@@ -129,7 +149,7 @@ const TodoContainer = () => {
                 <div className="delete-controls">
                     <div className="selection-buttons">
                         <button onClick={selectAll} className="select-btn">
-                            Select All
+                            Select All ({tasks.length})
                         </button>
                         <button onClick={deselectAll} className="select-btn">
                             Deselect All
@@ -155,12 +175,12 @@ const TodoContainer = () => {
                             key={task._id}
                             taskId={task._id}
                             taskName={task.taskName}
-                            taskDetail={task.taskDetail}
+                            taskDetail={task.taskDetail || "No details provided"}
                             priorityLevel={task.priorityLevel}
                             dateAdded={task.dateAdded}
                             isResolved={task.isResolved}
                             isDeleteMode={isDeleteMode}
-                            isSelected={selectedTasks.has(task._id)}
+                            isSelected={selectedTasks.has(String(task._id))} // CONVERT HERE TOO!
                             onToggleSelect={toggleTaskSelection}
                         />
                     ))
@@ -175,3 +195,4 @@ const TodoContainer = () => {
 }
 
 export default TodoContainer;
+
