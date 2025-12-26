@@ -1,0 +1,29 @@
+services:
+  # Your Node.js Backend
+  - type: web
+    name: todo-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false # You will manually paste your DB string in the Render dashboard
+      - key: NODE_ENV
+        value: production
+
+  # Optional: Your Frontend (if you want to move it from Vercel to Render)
+  - type: static
+    name: todo-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    publishPath: frontend/dist
+    routes:
+      - type: rewrite
+        source: /assets/*
+        destination: /assets/*
+      - type: rewrite
+        source: /*
+        destination: /index.html
