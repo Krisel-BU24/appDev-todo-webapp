@@ -1,3 +1,6 @@
+import 'dotenv/config'; // MUST BE LINE 1
+import express from 'express';
+import { connectDb } from './config/db.js';
 import jwt from "jsonwebtoken";
 import express from "express";
 import dotenv from "dotenv";
