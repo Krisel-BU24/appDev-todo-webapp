@@ -11,8 +11,8 @@ services:
         value: 10000
 
   # Your Vite Frontend
-  - type: static_site
+  - type: web
     name: todo-frontend
-    env: static
+    runtime: static  # This is the key fix for "static_site" errors
     buildCommand: cd frontend && npm install && npm run build
-    publishPath: frontend/dist
+    staticPublishPath: ./frontend/dist
